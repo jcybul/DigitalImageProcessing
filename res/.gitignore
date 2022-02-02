@@ -1,0 +1,11 @@
+# Just paste contents from the .zip
+# File structure should look like this
+#
+# res
+#   -- test
+#     -- < random folders with .jpgs >
+#   -- train
+#     -- < random folders with .jpgs >
+
+*
+!.gitignore
