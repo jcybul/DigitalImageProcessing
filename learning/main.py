@@ -19,9 +19,6 @@ img_size = (100,150)
 batch_size = 10
 num_epochs = 10
 
-# dataset = TrajectoryDataset(traj_len = traj_len, num_drivers = num_drivers, device = device)
-# model = Siamese(input_size = n_features).to(device)
-
 train_data = ImageDataset("../res/train", img_size, device = device)
 test_data = ImageDataset("../res/test", img_size, device = device)
 
