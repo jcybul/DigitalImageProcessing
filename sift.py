@@ -1,3 +1,4 @@
+from cv2 import StereoBM_PREFILTER_XSOBEL
 import numpy as np
 import cv2 as cv
 from skimage.exposure import match_histograms
@@ -21,74 +22,109 @@ def match_images(img1, img2):
         return [img2, img1_matched]
 
 
+def sift_feature_extraction(img1, img2, brighter, darker):
+    # Create SIFT extractor
+    sift = cv.SIFT_create()
+
+    # Extract keypoints
+    kp1 = sift.detect(img1, None)
+    kp2 = sift.detect(img2, None)
+    kpb = sift.detect(brighter, None)
+    kpd = sift.detect(darker, None)
+
+    # Draw keypoints on image
+    img1_kp = cv.drawKeypoints(img1, kp1, img1)
+    img2_kp = cv.drawKeypoints(img2, kp2, img2)
+    brighter_kp = cv.drawKeypoints(brighter, kpb, brighter)
+    darker_kp = cv.drawKeypoints(darker, kpd, darker)
+
+    return [img1_kp, img2_kp, brighter_kp, darker_kp]
+
+
+def sobel_edge_detection(img1, img2, brighter, darker):
+    sobel1 = cv.Sobel(src=img1, ddepth=cv.CV_64F, dx=1, dy=1, ksize=5)
+    sobel2 = cv.Sobel(src=img2, ddepth=cv.CV_64F, dx=1, dy=1, ksize=5)
+    sobelb = cv.Sobel(src=brighter, ddepth=cv.CV_64F, dx=1, dy=1, ksize=5)
+    sobeld = cv.Sobel(src=darker, ddepth=cv.CV_64F, dx=1, dy=1, ksize=5)
+    return [sobel1, sobel2, sobelb, sobeld]
+
+
+def canny_edge_detection(img1, img2, brighter, darker):
+    canny1 = cv.Canny(image=img1, threshold1=100, threshold2=200)
+    canny2 = cv.Canny(image=img2, threshold1=100, threshold2=200)
+    cannyb = cv.Canny(image=brighter, threshold1=100, threshold2=200)
+    cannyd = cv.Canny(image=darker, threshold1=100, threshold2=200)
+    return [canny1, canny2, cannyb, cannyd]
+
+
 # Load images
-img_night = cv.imread('res/test/00021510/20151102_060125.jpg')
-img_day = cv.imread('res/test/00021510/20151108_160137.jpg')
+img1 = cv.imread('res/test/00021510/20151102_060125.jpg')
+img2 = cv.imread('res/test/00021510/20151108_160137.jpg')
 
 # Match images
-[brighter, darker] = match_images(img_night, img_day)
+[brighter, darker] = match_images(img1, img2)
 
 # Concatenate matching results
 all_images = np.concatenate(
-    (img_night, img_day, brighter, darker), axis=1)
-
+    (img1, img2, brighter, darker), axis=1)
 
 cv.imshow('Matching', all_images)
 cv.waitKey(0)
+
+# Approach #0.5: Convert into grayscale
+img1 = cv.cvtColor(img1, cv.COLOR_BGR2GRAY)
+img2 = cv.cvtColor(img2, cv.COLOR_BGR2GRAY)
+brighter = cv.cvtColor(brighter, cv.COLOR_BGR2GRAY)
+darker = cv.cvtColor(darker, cv.COLOR_BGR2GRAY)
+
+# Approach #1: SIFT Feature extraction
+[img1_kp, img2_kp, brighter_kp, darker_kp] = sift_feature_extraction(
+    img1, img2, brighter, darker)
+
+all_kp = np.concatenate(
+    (img1_kp, img2_kp, brighter_kp, darker_kp), axis=1)
+
+# cv.imshow('Matching', all_kp)
+# cv.waitKey(0)
+
+# Approach #1.5: Blur the image
+# brighter = cv.GaussianBlur(brighter, (3, 3), 0, cv.BORDER_DEFAULT)
+# darker = cv.GaussianBlur(darker, (3, 3), 0, cv.BORDER_DEFAULT)
+
+# Approach #2: Sobel Edge Detection
+[sobel1, sobel2, sobelb, sobeld] = sobel_edge_detection(
+    img1, img2, brighter, darker)
+
+all_sobel = np.concatenate(
+    (sobel1, sobel2, sobelb, sobeld), axis=1)
+
+# cv.imshow('Matching', all_sobel)
+# cv.waitKey(0)
+
+# Approach 2.5.1: Downsample pyrDown
+# img1 = cv.pyrDown(img1)
+# img2 = cv.pyrDown(img2)
+# brighter = cv.pyrDown(brighter)
+# darker = cv.pyrDown(darker)
+
+# Approach 2.5.2: Downsample resize
+# ratio = 0.5
+# img1 = cv.resize(img1, (0, 0), fx=ratio, fy=ratio,
+#                  interpolation=cv.INTER_NEAREST)
+# img2 = cv.resize(img2, (0, 0), fx=ratio, fy=ratio,
+#                  interpolation=cv.INTER_NEAREST)
+# brighter = cv.resize(brighter, (0, 0), fx=ratio, fy=ratio,
+#                      interpolation=cv.INTER_NEAREST)
+# darker = cv.resize(darker, (0, 0), fx=ratio, fy=ratio,
+#                    interpolation=cv.INTER_NEAREST)
+
+# Approach #3: Canny Edge Detection
+[canny1, canny2, canny1b, cannyd] = canny_edge_detection(
+    img1, img2, brighter, darker)
+
+all_canny = np.concatenate(
+    (canny1, canny2, canny1b, cannyd), axis=1)
+
+cv.imshow('Matching', all_canny)
+cv.waitKey(0)
 cv.destroyAllWindows()
-
-# # img_night_hsv = cv.cvtColor(img_night, cv.COLOR_RGB2HSV)
-# # img_day_hsv = cv.cvtColor(img_day, cv.COLOR_RGB2HSV)
-
-# # night_brightness = img_night_hsv[..., 2].mean()
-# # day_brightness = img_day_hsv[..., 2].mean()
-
-# # print(img_night_hsv)
-# # print(img_day_hsv)
-
-
-# #
-# # night_brightness = np.average([img_night_hsv[i]
-# #                                for i in range(len(img_night_hsv)) if i % 3 == 2])
-
-# # day_brightness = np.average([img_day_hsv[i]
-# #                                for i in range(len(img_day_hsv)) if i % 3 == 2])
-
-# print(night_brightness)
-# print(day_brightness)
-
-
-# # cv.imshow('Night', img_night)
-# # cv.imshow('Day', img_day)
-
-# img_night_matched = match_histograms(img_day, img_night, channel_axis=-1)
-
-# cv.imshow('Night Matched', img_night_matched)
-
-# if cv.waitKey(0) & 0xff == 27:
-#     cv.destroyAllWindows()
-
-
-# # img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-# # # (thresh, img_gray) = cv.threshold(
-# # #     img_gray, 127, 255, cv.THRESH_BINARY)
-
-# # # SIFT
-
-# # sift = cv.SIFT_create()
-# # kp = sift.detect(img_gray, None)
-
-# # img = cv.drawKeypoints(img_gray, kp, img)
-
-# # cv.imwrite("test.jpg", img)
-
-# # Harris
-# # img_gray = np.float32(img_gray)
-# # dst = cv.cornerHarris(img_gray, 2, 3, 0.04)
-# # # result is dilated for marking the corners, not important
-# # dst = cv.dilate(dst, None)
-# # # Threshold for an optimal value, it may vary depending on the image.
-# # img[dst > 0.01*dst.max()] = [0, 0, 255]
-# # cv.imshow('dst', img)
-# # if cv.waitKey(0) & 0xff == 27:
-# #     cv.destroyAllWindows()
