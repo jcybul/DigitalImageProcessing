@@ -15,7 +15,7 @@ from dataset import ImageDataset
 from learning import train, test
 
 device = torch.device("cuda")
-img_size = (100,150)
+img_size = (200,300)
 batch_size = 10
 num_epochs = 10
 

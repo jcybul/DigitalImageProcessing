@@ -33,5 +33,3 @@ def extractFeatures(i1,i2):
 if __name__ == '__main__':
     print(extractFeatures("res/p1.jpg","res/p2.jpg"))
     exit(0)
-
-

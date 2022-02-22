@@ -1,13 +1,13 @@
 import torch
 from torch.utils.data import Dataset
 from torchvision import datasets, transforms
-
 import matplotlib.pyplot as plt
 import random
+from utils import normalize, gradient_one, gradient_rgb
 
 class ImageDataset(Dataset):
 
-    def __init__(self, path = "../res/train", img_size = (400,600), device = torch.device("cuda")):
+    def __init__(self, path = "../res/train", img_size = (200,300), device = torch.device("cuda")):
         self.device = device
         self.path = path
         self.img_size = img_size
@@ -15,7 +15,10 @@ class ImageDataset(Dataset):
                                          transform = transforms.Compose([
                                              transforms.Resize(self.img_size),
                                              transforms.ToTensor(),
-                                             transforms.ConvertImageDtype(torch.float)]))
+                                             gradient_rgb,
+                                             # transforms.ConvertImageDtype(torch.uint8),
+                                             # transforms.RandomEqualize(),
+                                             transforms.ConvertImageDtype(torch.float),]))
         self.num_classes = len(self.data.classes)
         self.targets = torch.tensor(self.data.targets)
 
@@ -29,17 +32,17 @@ class ImageDataset(Dataset):
         return self.data[x1][0].to(self.device), self.data[x2][0].to(self.device), torch.tensor(int(i1 == i2), dtype=torch.long, device = self.device)
 
     def __len__(self):
-        return 5000
+        return 10000
 
 if __name__ == '__main__':
     dataset = ImageDataset()
     x1, x2, y1 = dataset[0]
     x3, x4, y2 = dataset[1]
 
-    img1 = x1.squeeze().permute(1,2,0)
-    img2 = x2.squeeze().permute(1,2,0)
-    img3 = x3.squeeze().permute(1,2,0)
-    img4 = x4.squeeze().permute(1,2,0)
+    img1 = x1.squeeze().permute(1,2,0).cpu()
+    img2 = x2.squeeze().permute(1,2,0).cpu()
+    img3 = x3.squeeze().permute(1,2,0).cpu()
+    img4 = x4.squeeze().permute(1,2,0).cpu()
     f, axarr = plt.subplots(2,2)
     axarr[0,0].imshow(img1)
     axarr[0,1].imshow(img2)

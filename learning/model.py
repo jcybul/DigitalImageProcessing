@@ -10,11 +10,9 @@ class Siamese(nn.Module):
         super(Siamese, self).__init__()
         self.input_size = input_size
 
-        self.conv = nn.Sequential(nn.Conv2d(3, 32, 8),
+        self.conv = nn.Sequential(nn.Conv2d(3, 32, 5, 3),
                                   nn.MaxPool2d((2,3)),
-                                  nn.Conv2d(32, 16, 5),
-                                  nn.MaxPool2d((2,3)),
-                                  nn.Conv2d(16, 8, 3),
+                                  nn.Conv2d(32, 64, 3, 1),
                                   nn.MaxPool2d((2,3)),
                                   nn.Flatten())
 
@@ -48,5 +46,5 @@ class Siamese(nn.Module):
         torch.save(self.state_dict(), path)
 
 if __name__ == '__main__':
-    model = Siamese((400,600))
+    model = Siamese((200,300))
     print(model)
