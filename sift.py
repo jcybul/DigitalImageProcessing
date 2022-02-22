@@ -4,8 +4,8 @@ import cv2 as cv
 img = cv.imread('res/test/00021510/20151102_060125.jpg')
 # img = cv.imread('res/test/00023966/20151118_231631.jpg')
 img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-(thresh, img_gray) = cv.threshold(
-    img_gray, 127, 255, cv.THRESH_BINARY)
+# (thresh, img_gray) = cv.threshold(
+#     img_gray, 127, 255, cv.THRESH_BINARY)
 
 # SIFT
 
