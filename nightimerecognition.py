@@ -1,7 +1,9 @@
 from time import sleep
-import cv2 as cv
-import numpy as np
 from matplotlib import pyplot as plt
+from cv2 import StereoBM_PREFILTER_XSOBEL
+import numpy as np
+import cv2 as cv
+import skimage
 
 def edgeDetection(i1, i2):
     img1 = cv.imread(i1, cv.IMREAD_GRAYSCALE)  # queryImage
@@ -9,6 +11,8 @@ def edgeDetection(i1, i2):
 
     wide = cv.Canny(img1, 10, 200)
     mid = cv.Canny(img2, 30, 150)
+
+
 
     plt.subplot(2, 2, 1)
     plt.imshow(wide)
@@ -18,13 +22,33 @@ def edgeDetection(i1, i2):
     plt.title("Edge Detection")
     plt.show()
 
+def match_images(img1, img2):
+    # Convert into HSV
+    img1_hsv = cv.cvtColor(img1, cv.COLOR_RGB2HSV)
+    img2_hsv = cv.cvtColor(img2, cv.COLOR_RGB2HSV)
+
+    # Calculate brightness
+    img1_brightness = img1_hsv[..., 2].mean()
+    img2_brightness = img2_hsv[..., 2].mean()
+
+    # Match histograms
+    if (img1_brightness > img2_brightness):
+        img2_matched = match_histograms(img2, img1, channel_axis=-1)
+        return [img1, img2_matched]
+    else:
+        img1_matched = match_histograms(img1, img2, channel_axis=-1)
+        return [img2, img1_matched]
+
 
 def extractFeatures(i1, i2):
     img1 = cv.imread(i1, cv.IMREAD_GRAYSCALE)  # queryImage
     img2 = cv.imread(i2, cv.IMREAD_GRAYSCALE)
 
-    img1 = cv.Canny(img1, 10, 200)
-    img2 = cv.Canny(img2, 10, 200)
+    l = match_images(img1,img2)
+
+    img1 = l[0]
+    img2 = l[1]
+
 
     # (thresh, img1) = cv.threshold(img1, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
     # (thresh, img2) = cv.threshold(img2, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
