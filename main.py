@@ -1,8 +1,16 @@
-import torch
+# This is a sample Python script.
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# Press ⌃R to execute it or replace it with your code.
+# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
-print('Using device:', torch.cuda.get_device_name(0) if device.type == 'cuda' else device.type)
 
+def print_hi(name):
+    # Use a breakpoint in the code line below to debug your script.
+    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+
+
+# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print(torch.rand(4, device=device))
+    print_hi('PyCharm')
+
+# See PyCharm help at https://www.jetbrains.com/help/pycharm/
