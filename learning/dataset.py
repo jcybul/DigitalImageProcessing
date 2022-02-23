@@ -3,11 +3,11 @@ from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 import random
-from utils import normalize, gradient_one, gradient_rgb
+from utils import normalize, draw_keypoints, gradient_rgb
 
 class ImageDataset(Dataset):
 
-    def __init__(self, path = "../res/train", img_size = (200,300), device = torch.device("cuda")):
+    def __init__(self, path = "../res/test", img_size = (200,300), device = torch.device("cuda")):
         self.device = device
         self.path = path
         self.img_size = img_size
@@ -15,24 +15,29 @@ class ImageDataset(Dataset):
                                          transform = transforms.Compose([
                                              transforms.Resize(self.img_size),
                                              transforms.ToTensor(),
-                                             gradient_rgb,
+                                             # gradient_rgb,
                                              # transforms.ConvertImageDtype(torch.uint8),
                                              # transforms.RandomEqualize(),
-                                             transforms.ConvertImageDtype(torch.float),]))
+                                             transforms.ConvertImageDtype(torch.float),
+                                             # transforms.ToTensor(),
+                                             ]))
         self.num_classes = len(self.data.classes)
         self.targets = torch.tensor(self.data.targets)
+
+    def sample_target(self, target):
+        return self.data[random.choice(torch.nonzero(self.targets == target, as_tuple=False).tolist())[0]][0].to(self.device)
 
     def __getitem__(self, index):
         if index % 2 == 0:
             [i1] = [i2] = random.sample(range(self.num_classes), 1)
         else:
             [i1, i2] = random.sample(range(self.num_classes), 2)
-        x1 = random.choice(torch.nonzero(self.targets == i1, as_tuple=False).tolist())[0]
-        x2 = random.choice(torch.nonzero(self.targets == i2, as_tuple=False).tolist())[0]
-        return self.data[x1][0].to(self.device), self.data[x2][0].to(self.device), torch.tensor(int(i1 == i2), dtype=torch.long, device = self.device)
+        x1 = self.sample_target(i1)
+        x2 = self.sample_target(i2)
+        return x1, x2, torch.tensor(int(i1 == i2), dtype=torch.long, device = self.device)
 
     def __len__(self):
-        return 10000
+        return 1000
 
 if __name__ == '__main__':
     dataset = ImageDataset()
