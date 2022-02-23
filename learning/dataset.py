@@ -25,7 +25,7 @@ class ImageDataset(Dataset):
         self.targets = torch.tensor(self.data.targets)
 
     def sample_target(self, target):
-        return self.data[random.choice(torch.nonzero(self.targets == target, as_tuple=False).tolist())[0]][0].to(self.device)
+        return self.data[random.choice(torch.nonzero(self.targets == target, as_tuple=False).tolist())[0]][0].squeeze().permute(1,2,0).to(self.device)
 
     def __getitem__(self, index):
         if index % 2 == 0:
@@ -44,10 +44,10 @@ if __name__ == '__main__':
     x1, x2, y1 = dataset[0]
     x3, x4, y2 = dataset[1]
 
-    img1 = x1.squeeze().permute(1,2,0).cpu()
-    img2 = x2.squeeze().permute(1,2,0).cpu()
-    img3 = x3.squeeze().permute(1,2,0).cpu()
-    img4 = x4.squeeze().permute(1,2,0).cpu()
+    img1 = x1.cpu()
+    img2 = x2.cpu()
+    img3 = x3.cpu()
+    img4 = x4.cpu()
     f, axarr = plt.subplots(2,2)
     axarr[0,0].imshow(img1)
     axarr[0,1].imshow(img2)
