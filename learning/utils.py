@@ -5,6 +5,7 @@ import torch.nn as nn
 import numpy as np
 from torch.autograd import Variable
 import torchvision.transforms as transforms
+import cv2 as cv
 
 
 def normalize(img):
@@ -31,3 +32,12 @@ def gradient_one(img):
 def gradient_rgb(img):
     res = torch.stack([gradient_one(img[i,:,:].unsqueeze(0)) for i in range(3)]).squeeze()
     return res
+
+def draw_keypoints(img):
+    img = img.permute(1, 2, 0).numpy()
+    img = cv.normalize(img, None, 0, 255, cv.NORM_MINMAX).astype('uint8')
+    cv.imshow('e',img)
+    sift = cv.SIFT_create()
+    kp = sift.detect(img, None)
+    cv.drawKeypoints(img, kp, img)
+    return img
