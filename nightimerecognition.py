@@ -11,9 +11,6 @@ def edgeDetection(i1, i2):
 
     wide = cv.Canny(img1, 10, 200)
     mid = cv.Canny(img2, 30, 150)
-
-
-
     plt.subplot(2, 2, 1)
     plt.imshow(wide)
 
@@ -21,6 +18,45 @@ def edgeDetection(i1, i2):
     plt.imshow(mid)
     plt.title("Edge Detection")
     plt.show()
+
+
+def newEdgeDection(img1,img2):
+    img1_night = False
+    img2_night = False
+
+    #MAtch images
+    l = match_images(img1, img2)
+    img1 = l[0]
+    img2 = l[2]
+    # Calculate brightness
+    img1_brightness = img1_hsv[..., 2].mean()
+    img2_brightness = img2_hsv[..., 2].mean()
+
+    if img1_brightness < 50:
+        img1_night = True
+    if img2_brightness < 50:
+        img2_night = True
+    img1 = cv.resize(img1, (300, 200), interpolation=cv.INTER_AREA)
+    img2 = cv.resize(img2, (300, 200), interpolation=cv.INTER_AREA)
+
+    t11 = 100
+    t12 = 150
+    t21 = 100
+    t22 = 150
+
+    if img1_night:
+        t11 = 40
+        t12 = 50
+    if img2_night:
+        t21 = 40
+        t22 = 50
+
+    img1 = cv.Canny(image=img1, threshold1=t11, threshold2=t12)
+    img2 = cv.Canny(image=img2, threshold1=t21, threshold2=t22)
+
+    return img1,img2
+
+
 
 def match_images(img1, img2):
     # Convert into HSV
@@ -44,10 +80,7 @@ def extractFeatures(i1, i2):
     img1 = cv.imread(i1, cv.IMREAD_GRAYSCALE)  # queryImage
     img2 = cv.imread(i2, cv.IMREAD_GRAYSCALE)
 
-    l = match_images(img1,img2)
-
-    img1 = l[0]
-    img2 = l[1]
+    img1,img2 = newEdgeDection(img1,img2)
 
 
     # (thresh, img1) = cv.threshold(img1, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
