@@ -71,11 +71,18 @@ all_images = np.concatenate(
 cv.imshow('Matching', all_images)
 cv.waitKey(0)
 
+# Appraoch #0.4: Erosion
+# kernel = np.ones((4, 4), np.uint8)
+# img1 = cv.erode(img1, kernel)
+# img2 = cv.erode(img2, kernel)
+# brighter = cv.erode(brighter, kernel)
+# darker = cv.erode(darker, kernel)
+
 # Approach #0.5: Convert into grayscale
-img1 = cv.cvtColor(img1, cv.COLOR_BGR2GRAY)
-img2 = cv.cvtColor(img2, cv.COLOR_BGR2GRAY)
-brighter = cv.cvtColor(brighter, cv.COLOR_BGR2GRAY)
-darker = cv.cvtColor(darker, cv.COLOR_BGR2GRAY)
+# img1 = cv.cvtColor(img1, cv.COLOR_BGR2GRAY)
+# img2 = cv.cvtColor(img2, cv.COLOR_BGR2GRAY)
+# brighter = cv.cvtColor(brighter, cv.COLOR_BGR2GRAY)
+# darker = cv.cvtColor(darker, cv.COLOR_BGR2GRAY)
 
 # Approach #1: SIFT Feature extraction
 [img1_kp, img2_kp, brighter_kp, darker_kp] = sift_feature_extraction(
@@ -84,8 +91,8 @@ darker = cv.cvtColor(darker, cv.COLOR_BGR2GRAY)
 all_kp = np.concatenate(
     (img1_kp, img2_kp, brighter_kp, darker_kp), axis=1)
 
-# cv.imshow('Matching', all_kp)
-# cv.waitKey(0)
+cv.imshow('Matching', all_kp)
+cv.waitKey(0)
 
 # Approach #1.5: Blur the image
 # brighter = cv.GaussianBlur(brighter, (3, 3), 0, cv.BORDER_DEFAULT)
@@ -126,5 +133,15 @@ all_canny = np.concatenate(
     (canny1, canny2, canny1b, cannyd), axis=1)
 
 cv.imshow('Matching', all_canny)
+cv.waitKey(0)
+
+# Approach #1: SIFT Feature extraction
+[img1_kp, img2_kp, brighter_kp, darker_kp] = sift_feature_extraction(
+    canny1, canny2, canny1b, cannyd)
+
+all_kp = np.concatenate(
+    (img1_kp, img2_kp, brighter_kp, darker_kp), axis=1)
+
+cv.imshow('Matching', all_kp)
 cv.waitKey(0)
 cv.destroyAllWindows()
