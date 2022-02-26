@@ -97,13 +97,6 @@ def process_image(img):
     img = cv.dilate(img, kernel, iterations=1)
     return img
 
-# Both 0 and Both 1
-
-# 1 0 and 0 1
-# 1 0 and 1 0
-# A and B
-# not A and not B
-
 
 def match_images(img1, img2):
     ones = cv.countNonZero(cv.bitwise_and(img1, img2))
@@ -115,7 +108,7 @@ def match_images(img1, img2):
 
 if __name__ == '__main__':
     data = BasicImageDataset("res/test")
-    master = data[17][0]
+    master = data[95][0]
     master = process_image(master)
     results = []
     for i in range(len(data)):
@@ -123,5 +116,8 @@ if __name__ == '__main__':
         img = process_image(img)
         result = match_images(master, img)
         results.append((result, i))
-    results = sorted(results, key=lambda tup: tup[0])
+    results = sorted(results, key=lambda tup: tup[0], reverse=True)
+    results = results[0:76]
+    results = [x for x in results if x[1] > 93]
     print(results)
+    print(len(results))
