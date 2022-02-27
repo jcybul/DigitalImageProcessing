@@ -45,7 +45,7 @@ def gradient_one(img, brightness):
 
     x = ten[0].unsqueeze(0).unsqueeze(0)
     # Want lower number with higher bightness
-    scale = 10
+    scale = 25
 
     a = scale/brightness * np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
     conv1 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
@@ -99,16 +99,29 @@ def process_image(img):
 
 
 def match_images(img1, img2):
-    ones = cv.countNonZero(cv.bitwise_and(img1, img2))
+    img1 = img1.astype(np.uint8)
+    img2 = img2.astype(np.uint8)
+    img1 = img1 * 255
+    img2 = img2 * 255
+    # Get common white pixels
+    white = cv.bitwise_and(img1, img2)
+    # Negate pictures
     img1n = cv.bitwise_not(img1)
     img2n = cv.bitwise_not(img2)
-    zeros = cv.countNonZero(cv.bitwise_and(img1n, img2n))
-    return ones+zeros
+    # Get common black pixels
+    black = cv.bitwise_and(img1n, img2n)
+    # Merge two images
+    merge = cv.bitwise_or(black, white)
+    # Calculate result
+    result = cv.countNonZero(merge)
+    # cv.imshow("Out", merge)
+    # cv.waitKey(0)
+    return result
 
 
 if __name__ == '__main__':
     data = BasicImageDataset("res/test")
-    master = data[95][0]
+    master = data[17][0]
     master = process_image(master)
     results = []
     for i in range(len(data)):
@@ -117,7 +130,7 @@ if __name__ == '__main__':
         result = match_images(master, img)
         results.append((result, i))
     results = sorted(results, key=lambda tup: tup[0], reverse=True)
-    results = results[0:76]
-    results = [x for x in results if x[1] > 93]
+    results = results[0:93]
+    results = [x for x in results if x[1] <= 93]
     print(results)
     print(len(results))
