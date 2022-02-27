@@ -40,14 +40,18 @@ def tensor_to_image(tensor):
     return PIL.Image.fromarray(tensor)
 
 
-def gradient_one(img, brightness):
+def gradient_one(img, brightness,flag=False,scale=25):
     ten = torch.unbind(img)
 
     x = ten[0].unsqueeze(0).unsqueeze(0)
     # Want lower number with higher bightness
-    scale = 25
 
-    a = scale/brightness * np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
+    if flag:
+        a = scale / brightness * np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
+    else:
+        a = brightness * np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
+
+
     conv1 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
     conv1.weight = nn.Parameter(torch.from_numpy(
         a).float().unsqueeze(0).unsqueeze(0))
@@ -63,10 +67,10 @@ def gradient_one(img, brightness):
     return G
 
 
-def gradient_rgb(img):
+def gradient_rgb(img,flag=False,scale=25):
     brightness = get_brightness(img)
     img = apply_transform(img, (400, 600))
-    res = torch.stack([gradient_one(img[i, :, :].unsqueeze(0), brightness)
+    res = torch.stack([gradient_one(img[i, :, :].unsqueeze(0), brightness,flag,scale)
                        for i in range(3)]).squeeze()
     return res
 
@@ -89,10 +93,10 @@ def CVImage(img):
     img = cv.cvtColor(img, cv.COLOR_RGB2BGR)
 
 
-def process_image(img):
-    img = gradient_rgb(img).numpy().transpose(1, 2, 0)
+def process_image(img,flag=False,t=0.1,scale=25):
+    img = gradient_rgb(img,flag,scale).numpy().transpose(1, 2, 0)
     img = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
-    (thresh, img) = cv.threshold(img, 0.1, 1, cv.THRESH_BINARY)
+    (thresh, img) = cv.threshold(img, t, 1, cv.THRESH_BINARY)
     kernel = np.ones((4, 4), np.uint8)
     img = cv.dilate(img, kernel, iterations=1)
     return img
